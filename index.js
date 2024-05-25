@@ -3,6 +3,7 @@ import { createServer } from "node:http";
 import { fileURLToPath } from "node:url";
 import { dirname, join } from "node:path";
 import { Server } from "socket.io";
+import cors from "cors";
 import "dotenv/config";
 
 const app = express();
@@ -22,6 +23,7 @@ menu.set("14", "onion rings");
 menu.set("3", "ice cream");
 menu.set("10", "Calamari");
 
+app.use(cors());
 app.use(express.static(join(__dirname, "public")));
 
 app.get("/", (req, res) => {
