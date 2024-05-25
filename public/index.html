@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<link rel="preconnect" href="https://fonts.googleapis.com" />
+		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+		<link
+			href="https://fonts.googleapis.com/css2?family=Noto+Sans:ital,wght@0,100..900;1,100..900&display=swap"
+			rel="stylesheet"
+		/>
+		<link rel="stylesheet" href="style.css" />
+		<title>Restaurant Chatbot</title>
+	</head>
+	<body>
+		<header>
+			<h1>Restaurant Chatbot</h1>
+		</header>
+
+		<main>
+			<ul class="chat-window">
+				<li class="bot">
+					<p>Hello! How can I help you today?</p>
+				</li>
+				<li class="bot">
+					<p>Select 1 to place an order.</p>
+					<p>Select 99 to checkout order.</p>
+					<p>Select 98 to see order history.</p>
+					<p>Select 97 to see current order.</p>
+					<p>Select 0 to cancel order.</p>
+				</li>
+			</ul>
+
+			<form id="form">
+				<div class="input-box">
+					<input
+						type="text"
+						name=""
+						id="input"
+						placeholder="Type message"
+						autocomplete="off"
+					/>
+					<button>Send</button>
+				</div>
+			</form>
+		</main>
+		<script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
+		<script>
+			const form = document.getElementById("form");
+			const input = document.getElementById("input");
+			const ul = document.querySelector("ul");
+
+			const socket = io("http://localhost:3000");
+
+			form.addEventListener("submit", (e) => {
+				e.preventDefault();
+				if (input.value) {
+					socket.emit("client message", input.value);
+					const value = input.value;
+					const li = document.createElement("li");
+					const paragraph = document.createElement("p");
+					li.classList.add("human");
+					paragraph.textContent = value;
+					li.appendChild(paragraph);
+					ul.appendChild(li);
+					ul.scrollTop = ul.scrollHeight;
+				}
+			});
+
+			socket.on("server message", (msg) => {
+				const temp = input.value;
+				input.value = "";
+
+				setTimeout(() => {
+					const li = document.createElement("li");
+					li.classList.add("bot");
+					const paragraph = document.createElement("p");
+
+					switch (temp) {
+						case "1":
+							const orders = JSON.parse(msg);
+							orders.forEach((order) => {
+								const paragraph = document.createElement("p");
+								paragraph.innerHTML = `${order[0]} &nbsp; - &nbsp; ${order[1]}`;
+								li.appendChild(paragraph);
+							});
+							break;
+						case "98":
+							const data = JSON.parse(msg);
+							if (data.length == 0) {
+								paragraph.textContent =
+									"History is empty. Please place an order first.";
+								li.appendChild(paragraph);
+							} else {
+								data.forEach((order) => {
+									const paragraph =
+										document.createElement("p");
+									paragraph.innerHTML = order;
+									li.appendChild(paragraph);
+								});
+							}
+							break;
+						case "99":
+						case "97":
+						case "0":
+						default:
+							paragraph.textContent = msg;
+							li.appendChild(paragraph);
+							break;
+					}
+					ul.appendChild(li);
+					ul.scrollTop = ul.scrollHeight;
+				}, 1300);
+			});
+		</script>
+	</body>
+</html>
