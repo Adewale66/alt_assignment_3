@@ -9,7 +9,7 @@
 
 ```bash
 # Clone this repository
-$ git clone https://github.com/Adewale66/alt_assignment_3
+$ git clone https://github.com/Adewale66/alt_assignment_3.git
 
 # Install dependencies
 $ npm install
